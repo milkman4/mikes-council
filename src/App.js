@@ -44,6 +44,7 @@ class App extends Component {
       messagingSenderId: '1014578643144',
     };
     var app = firebase.initializeApp(config);
+    this.database = firebase.database();
   }
   state = {
     name: '',
@@ -53,6 +54,7 @@ class App extends Component {
     submitted: false,
     showSnackbar: false,
     radius: 50,
+    filteredUserResults: [],
   };
   handleChange = name => event => {
     this.setState({
@@ -62,7 +64,7 @@ class App extends Component {
   handleSubmit = e => {
     console.log(this.database);
     const { name, email, zip } = this.state;
-    this.database.ref('users/' + email).set({
+    this.database.ref('users/' + email.replace('.', '')).set({
       name,
       email,
       zip,
@@ -101,7 +103,18 @@ class App extends Component {
       this.setState({
         filteredUserResults: filteredUserArray,
       });
+      console.log(filteredUserArray);
     }
+  };
+  renderListOfEmails = () => {
+    if (this.state.filteredUserResults.length === 0) return null;
+    return this.state.filteredUserResults.map(user => {
+      return (
+        <li>
+          {user.name} - {user.email}
+        </li>
+      );
+    });
   };
   render() {
     const { classes } = this.props;
@@ -158,7 +171,7 @@ class App extends Component {
         </form>
 
         <div>
-          Get Users by Zip code
+          Get Users by Zip code (for mike's testing)
           <TextField
             id="zipSearch"
             label="zip of show"
@@ -178,6 +191,9 @@ class App extends Component {
           <Button className={classes.button} onClick={this.searchZips}>
             Search
           </Button>
+          <div>
+            <ul>{this.renderListOfEmails()}</ul>
+          </div>
         </div>
       </div>
     );
