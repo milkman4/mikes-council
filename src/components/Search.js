@@ -2,10 +2,6 @@ import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import Form from './components/Form';
-
-// const zipKey =
-//   'XPnNqFcJSF17nI5bgHu383FtrX76vuGDyZPa0Pzag9sjHcpj4OhXYbmJrw8FUzBJ';
 const zipKey =
   'js-2VR2cissqvjFctMmGh4Yh5PjHeE3HJKYrx5HqV6lgms2hPqy6J5bGeGdnpQqLDh2';
 var firebase = require('firebase');
@@ -28,7 +24,7 @@ const styles = theme => ({
   },
 });
 
-class App extends Component {
+class Search extends Component {
   componentDidMount() {
     var config = {
       apiKey: 'AIzaSyDHYKD3oSxOaWbYFa2ShOEUg0jfOwdNrFE',
@@ -42,12 +38,7 @@ class App extends Component {
     this.database = firebase.database();
   }
   state = {
-    name: '',
-    email: '',
-    zip: '',
     zipSearch: '',
-    submitted: false,
-    showSnackbar: false,
     radius: 50,
     filteredUserResults: [],
   };
@@ -56,20 +47,7 @@ class App extends Component {
       [name]: event.target.value,
     });
   };
-  handleSubmit = data => {
-    const { email, name, zip } = data;
-    this.database.ref('users/' + email.replace('.', '')).set({
-      name,
-      email,
-      zip,
-    });
-  };
 
-  handleClose = () => {
-    this.setState({
-      showSnackbar: false,
-    });
-  };
   searchZips = async () => {
     const { radius, zipSearch } = this.state;
     const cors = await fetch(
@@ -108,8 +86,7 @@ class App extends Component {
     const { classes } = this.props;
 
     return (
-      <div className="App">
-        <Form submitToDatabase={this.handleSubmit} classes={classes}/>
+      <div className="Search">
         <div>
           Get Users by Zip code (for mike's testing)
           <TextField
@@ -140,4 +117,4 @@ class App extends Component {
   }
 }
 
-export default withStyles(styles)(App);
+export default withStyles(styles)(Search);
