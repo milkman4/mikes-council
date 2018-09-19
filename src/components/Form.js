@@ -2,19 +2,40 @@ import React, { PureComponent } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Snackbar from '@material-ui/core/Snackbar';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
 import Checkbox from '@material-ui/core/Checkbox';
+import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import Collapse from '@material-ui/core/Collapse';
 
 const styles = theme => ({
-  container: {
-    width: '500px',
-    margin: 'auto',
+  appBar: {
+    position: 'relative',
+  },
+  layout: {
+    width: 'auto',
+    marginLeft: theme.spacing.unit * 2,
+    marginRight: theme.spacing.unit * 2,
+    [theme.breakpoints.up(600 + theme.spacing.unit * 2 * 2)]: {
+      width: 600,
+      marginLeft: 'auto',
+      marginRight: 'auto',
+    },
+  },
+  paper: {
+    marginTop: theme.spacing.unit * 3,
+    marginBottom: theme.spacing.unit * 3,
+    padding: theme.spacing.unit * 2,
+    [theme.breakpoints.up(600 + theme.spacing.unit * 3 * 2)]: {
+      marginTop: theme.spacing.unit * 6,
+      marginBottom: theme.spacing.unit * 6,
+      padding: theme.spacing.unit * 3,
+    },
   },
   textField: {
     display: 'block',
@@ -25,12 +46,6 @@ const styles = theme => ({
   textArea: {
     width: '100%',
     marginTop: '10px',
-  },
-  header: {
-    width: '100%',
-    margin: 'auto',
-    marginTop: '30px',
-    textAlign: 'center',
   },
   menu: {
     width: 200,
@@ -51,6 +66,30 @@ const styles = theme => ({
   },
 });
 
+const checkboxOptions = {
+  a: {
+    text: "I am interested in participating in a men's group.",
+    key: 'a',
+  },
+  b: {
+    text: 'I am interested in participating in a coed group',
+    key: 'b',
+  },
+  c: {
+    text: 'I am interested in a coed relational workshop that includes yoga.',
+    key: 'c',
+  },
+  d: {
+    text: 'I can provide or help Mike find a space to host a group in my area.',
+    key: 'd',
+  },
+  e: {
+    text:
+      'I have group facilitation experience and can assist Mike in order to accommodate a larger group.', // more details?
+    key: 'e',
+  },
+};
+
 class Form extends PureComponent {
   state = {
     name: '',
@@ -59,22 +98,23 @@ class Form extends PureComponent {
     zipSearch: '',
     submitted: false,
     showSnackbar: false,
-    hostAGroup: false,
-    hostAGroupDetails: '',
-    genderGroup: false,
-    genderGroupDetails: '',
-    groupAddons: false,
-    groupAddonsDetails: '',
+    checkboxes: { a: false, b: false, c: false, d: false, e: false },
+    checkboxesExpand: { a: '', b: '', c: '', d: '', e: '' },
   };
+
   handleChange = name => event => {
     this.setState({
-      [name]: event.target.value,
+      checkboxesExpand: Object.assign({}, this.state.checkboxesExpand, {
+        [name]: event.target.value,
+      }),
     });
   };
 
   handleCheckboxChange = name => event => {
     this.setState({
-      [name]: event.target.checked,
+      checkboxes: Object.assign({}, this.state.checkboxes, {
+        [name]: event.target.checked,
+      }),
     });
   };
 
@@ -96,135 +136,155 @@ class Form extends PureComponent {
       showSnackbar: false,
     });
   };
+
+  renderCheckboxes = () => {
+    const { classes } = this.props;
+
+    return Object.values(checkboxOptions).map(option => {
+      return (
+        <div className={classes.checkbox} key={`option-${option.key}`}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={this.state.checkboxes[option.key]}
+                onChange={this.handleCheckboxChange(option.key)}
+                value={this.state.checkboxes[option.key]}
+              />
+            }
+            label={option.text}
+          />
+          <Collapse in={this.state.checkboxes[option.key]} timeout={300}>
+            <TextField
+              id={`textField-${option.key}`}
+              label="add some details, if you'd like"
+              multiline={true}
+              className={classes.textArea}
+              value={this.state.checkboxesExpand[option.key]}
+              onChange={this.handleChange(option.key)}
+              margin="normal"
+              fullWidth
+            />
+          </Collapse>
+        </div>
+      );
+    });
+  };
   render() {
     const { classes } = this.props;
     const { showSnackbar } = this.state;
     return (
-      <form className={classes.container}>
-        <Typography
-          variant="title"
-          color="inherit"
-          align="center"
-          className={classes.header}
-        >
-          Interested in participating in a Authenic Relating Council with Mike?
-        </Typography>
-        <TextField
-          id="name"
-          label="name"
-          className={classes.textField}
-          value={this.state.name}
-          onChange={this.handleChange('name')}
-          margin="normal"
-          fullWidth
-        />
-        <TextField
-          id="email"
-          label="email"
-          className={classes.textField}
-          value={this.state.email}
-          onChange={this.handleChange('email')}
-          margin="normal"
-          fullWidth
-        />
-        <TextField
-          id="zip"
-          label="zip code"
-          className={classes.textField}
-          value={this.state.zip}
-          onChange={this.handleChange('zip')}
-          margin="normal"
-          fullWidth
-        />
-        <Snackbar
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-          open={showSnackbar}
-          onClose={this.handleClose}
-          ContentProps={{
-            'aria-describedby': 'message-id',
-          }}
-          message={<span id="message-id">Submitted to Mike - stay tuned!</span>}
-        />
-        <FormGroup>
-          <div className={classes.checkbox}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={this.state.hostAGroup}
-                  onChange={this.handleCheckboxChange('hostAGroup')}
-                  value="hostAGroup"
-                />
-              }
-              label="Can you provide a space to host a group, or help Mike find a space in your area?"
-            />
-            <Collapse in={this.state.hostAGroup} timeout={300}>
+      <React.Fragment>
+        <CssBaseline />
+        <AppBar position="absolute" color="default" className={classes.appBar}>
+          <Toolbar>
+            <Typography
+              variant="title"
+              color="inherit"
+              align="center"
+              className={classes.header}
+            >
+              Council Interest Form
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <main className={classes.layout}>
+          <Paper className={classes.paper}>
+            <form className={classes.container}>
               <TextField
-                id="hostAGroupDetails"
-                label="add some details"
-                multiline={true}
-                className={classes.textArea}
-                value={this.state.hostAGroupDetails}
-                onChange={this.handleChange('hostAGroupDetails')}
+                id="name"
+                label="name"
+                className={classes.textField}
+                value={this.state.name}
+                onChange={this.handleChange('name')}
                 margin="normal"
                 fullWidth
               />
-            </Collapse>
-          </div>
-          <div className={classes.checkbox}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={this.state.genderGroup}
-                  onChange={this.handleCheckboxChange('genderGroup')}
-                  value="genderGroup"
-                />
-              }
-              label="Are you interested in a Men or Women-only group?"
-            />
-            <Collapse in={this.state.genderGroup} timeout={300}>
               <TextField
-                id="genderGroupDetails"
-                label="add some details"
-                multiline={true}
-                className={classes.textArea}
-                value={this.state.genderGroupDetails}
-                onChange={this.handleChange('genderGroupDetails')}
+                id="email"
+                label="email"
+                className={classes.textField}
+                value={this.state.email}
+                onChange={this.handleChange('email')}
                 margin="normal"
                 fullWidth
               />
-            </Collapse>
-          </div>
-          <div className={classes.checkbox}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={this.state.groupAddons}
-                  onChange={this.handleCheckboxChange('groupAddons')}
-                  value="groupAddons"
-                />
-              }
-              label="Would you like to participate in a council that included yoga, escatic dance or some other complementary activity?"
-            />
-            <Collapse in={this.state.groupAddons} timeout={300}>
               <TextField
-                id="groupAddonsDetails"
-                label="add some details"
-                multiline={true}
-                className={classes.textArea}
-                value={this.state.groupAddonsDetails}
-                onChange={this.handleChange('groupAddonsDetails')}
+                id="zip"
+                label="zip code"
+                className={classes.textField}
+                value={this.state.zip}
+                onChange={this.handleChange('zip')}
                 margin="normal"
                 fullWidth
               />
-            </Collapse>
-          </div>
-        </FormGroup>
-        <Button className={classes.button} onClick={this.handleSubmit}>
-          Send to Mike
-        </Button>
-      </form>
+              <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                open={showSnackbar}
+                onClose={this.handleClose}
+                ContentProps={{
+                  'aria-describedby': 'message-id',
+                }}
+                message={
+                  <span id="message-id">Submitted to Mike - stay tuned!</span>
+                }
+              />
+              <FormGroup>{this.renderCheckboxes()}</FormGroup>
+              <Button className={classes.button} onClick={this.handleSubmit}>
+                Send to Mike
+              </Button>
+            </form>
+          </Paper>
+        </main>
+      </React.Fragment>
     );
   }
 }
+// <div className={classes.checkbox}>
+// <FormControlLabel
+//   control={
+//     <Checkbox
+//       checked={this.state.genderGroup}
+//       onChange={this.handleCheckboxChange('genderGroup')}
+//       value="genderGroup"
+//     />
+//   }
+//   label="Are you interested in a Men's or Women's-only group?"
+// />
+// <Collapse in={this.state.genderGroup} timeout={300}>
+//   <TextField
+//     id="genderGroupDetails"
+//     label="add some details"
+//     multiline={true}
+//     className={classes.textArea}
+//     value={this.state.genderGroupDetails}
+//     onChange={this.handleChange('genderGroupDetails')}
+//     margin="normal"
+//     fullWidth
+//   />
+// </Collapse>
+// </div>
+// <div className={classes.checkbox}>
+// <FormControlLabel
+//   control={
+//     <Checkbox
+//       checked={this.state.groupAddons}
+//       onChange={this.handleCheckboxChange('groupAddons')}
+//       value="groupAddons"
+//     />
+//   }
+//   label="Would you like to participate in a council that included yoga, escatic dance or some other complementary activity?"
+// />
+// <Collapse in={this.state.groupAddons} timeout={300}>
+//   <TextField
+//     id="groupAddonsDetails"
+//     label="add some details"
+//     multiline={true}
+//     className={classes.textArea}
+//     value={this.state.groupAddonsDetails}
+//     onChange={this.handleChange('groupAddonsDetails')}
+//     margin="normal"
+//     fullWidth
+//   />
+// </Collapse>
 
 export default withStyles(styles)(Form);
